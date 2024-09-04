@@ -1,24 +1,12 @@
 const express = require('express');
 const multer = require('multer');
-const path = require('path');
+const { uploadToExternalStorage } = require('./uploadService');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Cấu hình lưu trữ cho multer
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
-  }
-});
-
-const upload = multer({ storage: storage });
-
-// Phục vụ file tĩnh từ thư mục 'uploads'
-app.use('/uploads', express.static('uploads'));
+// Sử dụng memory storage
+const upload = multer({ storage: multer.memoryStorage() });
 
 // Trang chủ
 app.get('/', (req, res) => {
@@ -26,12 +14,18 @@ app.get('/', (req, res) => {
 });
 
 // Xử lý upload file
-app.post('/upload', upload.single('file'), (req, res) => {
+app.post('/upload', upload.single('file'), async (req, res) => {
   if (req.file) {
-    res.send(`File đã được tải lên thành công! <br>
-              <a href="/uploads/${req.file.filename}" target="_blank">Xem file</a>`);
+    try {
+      const fileUrl = await uploadToExternalStorage(req.file);
+      res.send(`File đã được tải lên thành công! <br>
+                <a href="${fileUrl}" target="_blank">Xem file</a>`);
+    } catch (error) {
+      console.error('Lỗi khi upload:', error);
+      res.status(500).send('Có lỗi xảy ra khi tải file lên storage.');
+    }
   } else {
-    res.status(400).send('Có lỗi xảy ra khi tải file.');
+    res.status(400).send('Không có file được gửi lên.');
   }
 });
 
