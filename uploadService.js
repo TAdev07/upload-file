@@ -13,7 +13,12 @@ async function uploadToExternalStorage(file) {
       { resource_type: 'auto' },
       (error, result) => {
         if (error) reject(error);
-        else resolve(result.secure_url);
+        else resolve({
+          url: result.secure_url,
+          format: result.format,
+          resourceType: result.resource_type,
+          publicId: result.public_id
+        });
       }
     );
 
