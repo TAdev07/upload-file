@@ -66,9 +66,9 @@ async function getFileInfo(publicId) {
   // Trong thực tế, bạn sẽ cần truy vấn database hoặc storage service để lấy thông tin này
   // Đây chỉ là ví dụ
   return {
-    url: `https://res.cloudinary.com/your-cloud-name/image/upload/${publicId}`,
-    mimeType: 'application/octet-stream', // Sử dụng 'application/octet-stream' cho tất cả các loại file
-    filename: `file_${publicId}.xlsx` // Tên file khi tải xuống
+    url: `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/raw/upload/${publicId}`,
+    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    filename: `file_${publicId}.xlsx`
   };
 }
 
